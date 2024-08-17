@@ -2,10 +2,9 @@
 // MedleySimulation main class, starts all threads
 package medleySimulation;
 
-import javax.swing.*;
-
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.*;
 
 public class MedleySimulation {
 	static final int numTeams=10;
@@ -59,7 +58,7 @@ public class MedleySimulation {
 		// add the listener to the jbutton to handle the "pressed" event
 		startB.addActionListener(new ActionListener() {
 		    public void actionPerformed(ActionEvent e)  {
-			    	  //does nothing - fix this 	  
+				SwimTeam.startLatch.countDown();
 		    }
 		   });
 	
