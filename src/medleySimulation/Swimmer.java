@@ -4,13 +4,12 @@
 package medleySimulation;
 
 import java.awt.Color;
-
 import java.util.Random;
 
 
-
 public class Swimmer extends Thread {
-	
+
+
 	public static StadiumGrid stadium; //shared 
 	private FinishCounter finish; //shared
 	
@@ -55,7 +54,7 @@ public class Swimmer extends Thread {
 		this.team=t;
 		start = stadium.returnStartingBlock(team);
 		finish=f;
-		rand=new Random();
+		rand=new Random();		
 	}
 	
 	//getter
@@ -86,7 +85,7 @@ public class Swimmer extends Thread {
 		int x_st= start.getX();
 		int y_st= start.getY();
 	//System.out.println("Thread "+this.ID + " has start position: " + x_st  + " " +y_st );
-	// System.out.println("Thread "+this.ID + " at " + currentBlock.getX()  + " " +currentBlock.getY() );
+	 System.out.println("Thread "+this.ID + " at " + currentBlock.getX()  + " " +currentBlock.getY() );
 	 while (currentBlock!=start) {
 		//	System.out.println("Thread "+this.ID + " has starting position: " + x_st  + " " +y_st );
 		//	System.out.println("Thread "+this.ID + " at position: " + currentBlock.getX()  + " " +currentBlock.getY() );
@@ -94,7 +93,7 @@ public class Swimmer extends Thread {
 			currentBlock=stadium.moveTowards(currentBlock,x_st,y_st,myLocation); //head toward starting block
 		//	System.out.println("Thread "+this.ID + " moved toward start to position: " + currentBlock.getX()  + " " +currentBlock.getY() );
 		}
-	System.out.println("-----------Thread "+this.ID + " at start " + currentBlock.getX()  + " " +currentBlock.getY() );
+	//System.out.println("-----------Thread "+this.ID + " at start " + currentBlock.getX()  + " " +currentBlock.getY() );
 	}
 	
 	//!!!You do not need to change the method below!!!
@@ -113,7 +112,7 @@ public class Swimmer extends Thread {
 			currentBlock=stadium.moveTowards(currentBlock,x,0,myLocation);
 			//System.out.println("Thread "+this.ID + " swimming " + currentBlock.getX()  + " " +currentBlock.getY() );
 			sleep((int) (movingSpeed*swimStroke.strokeTime)); //swim
-			System.out.println("Thread "+this.ID + " swimming  at speed" + movingSpeed );	
+			//System.out.println("Thread "+this.ID + " swimming  at speed" + movingSpeed );	
 		}
 
 		while((boolean) ((currentBlock.getY())!=(StadiumGrid.start_y-1))) {
@@ -138,17 +137,22 @@ public class Swimmer extends Thread {
 	
 	public void run() {
 		try {
-			
 			//Swimmer arrives
 			sleep(movingSpeed+(rand.nextInt(10))); //arriving takes a while
 			myLocation.setArrived();
 			enterStadium();	
-			
 			goToStartingBlocks();
-								
-			dive(); 
-				
+			MedleySimulation.swimLatch.countDown();
+			
+			try {
+				MedleySimulation.swimLatch.await();
+				//System.out.println("swim latch opened");				
+				dive();	
+			} catch (InterruptedException e) {
+			}
+
 			swimRace();
+
 			if(swimStroke.order==4) {
 				finish.finishRace(ID, team); // fnishline
 			}
@@ -157,8 +161,7 @@ public class Swimmer extends Thread {
 				exitPool();//if not last swimmer leave pool
 			}
 			
-		} catch (InterruptedException e1) {  //do nothing
-		} 
+		} catch (InterruptedException e1) {} 
 	}
 	
 }

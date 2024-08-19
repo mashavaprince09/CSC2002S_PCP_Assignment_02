@@ -12,7 +12,7 @@ public class FinishCounter {
 		winningTeam=-1; //no-one has won at start
 	}
 		
-	//This is called by a swimmer when they touch the fnish line
+	//This is called by a swimmer when they touch the finish line
 	public synchronized void finishRace(int swimmer, int team) {
 		boolean won =false;
 		if(firstAcrossLine) {

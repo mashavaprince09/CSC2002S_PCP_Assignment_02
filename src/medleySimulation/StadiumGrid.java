@@ -115,7 +115,7 @@ public class StadiumGrid {
 	} 
 	
 	//levitate to a specific block -
-public GridBlock jumpTo(GridBlock currentBlock,int x, int y,PeopleLocation myLocation) throws InterruptedException {  
+	public GridBlock jumpTo(GridBlock currentBlock,int x, int y,PeopleLocation myLocation) throws InterruptedException {  
 		//restrict i and j to grid
 		if (!inStadiumArea(x,y)) {
 			System.out.println("Invalid move");

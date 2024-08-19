@@ -4,9 +4,14 @@ package medleySimulation;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
+
 import javax.swing.*;
 
 public class MedleySimulation {
+	static CountDownLatch swimLatch =  new CountDownLatch(10);
+
 	static final int numTeams=10;
 	
    	static int frameX=300; //frame width
@@ -57,6 +62,7 @@ public class MedleySimulation {
         JButton startB = new JButton("Start");
 		// add the listener to the jbutton to handle the "pressed" event
 		startB.addActionListener(new ActionListener() {
+            @Override
 		    public void actionPerformed(ActionEvent e)  {
 				SwimTeam.startLatch.countDown();
 		    }
@@ -65,6 +71,7 @@ public class MedleySimulation {
 		JButton endB = new JButton("Quit");
 				// add the listener to the jbutton to handle the "pressed" event
 				endB.addActionListener(new ActionListener() {
+                  @Override
 			      public void actionPerformed(ActionEvent e) {
 			    	  System.exit(0);
 			      }
@@ -80,10 +87,8 @@ public class MedleySimulation {
         frame.setVisible(true);	
 	}
 	
-	
 //Main method - starts it all
 	public static void main(String[] args) throws InterruptedException {
-	
 	
 	    finishLine = new FinishCounter(); //counters for people inside and outside club
 	 
@@ -96,7 +101,6 @@ public class MedleySimulation {
         	teams[i]=new SwimTeam(i, finishLine, peopleLocations);        	
 		}
 		setupGUI(frameX, frameY);  //Start Panel thread - for drawing animation
-		
 		//start viewer thread
 		Thread view = new Thread(stadiumView); 
 		view.start();
@@ -109,5 +113,6 @@ public class MedleySimulation {
       	for (int i=0;i<numTeams;i++) {
 			teams[i].start();
 		}
+
 	}
 }
