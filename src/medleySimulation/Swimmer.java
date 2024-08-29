@@ -5,14 +5,11 @@ package medleySimulation;
 
 import java.awt.Color;
 import java.util.Random;
-
+import java.util.concurrent.atomic.*;
 
 public class Swimmer extends Thread {
-
-
 	public static StadiumGrid stadium; //shared 
 	private FinishCounter finish; //shared
-	
 		
 	GridBlock currentBlock;
 	private Random rand;
@@ -24,10 +21,10 @@ public class Swimmer extends Thread {
 	private GridBlock start;
 
 	public enum SwimStroke { 
-		Backstroke(1,2.5,Color.black),
-		Breaststroke(2,2.1,new Color(255,102,0)),
-		Butterfly(3,2.55,Color.magenta),
-		Freestyle(4,2.8,Color.red);
+		Backstroke(0,2.5,Color.black),
+		Breaststroke(1,2.1,new Color(255,102,0)),
+		Butterfly(2,2.55,Color.magenta),
+		Freestyle(3,2.8,Color.red);
 	    	
 	     private final double strokeTime;
 	     private final int order; // in minutes
@@ -44,6 +41,8 @@ public class Swimmer extends Thread {
 	        public  Color getColour() { return colour; }
 	    }  
 	    private final SwimStroke swimStroke;
+		
+		private  AtomicBoolean checker;//my lane checker
 	
 	//Constructor
 	Swimmer( int ID, int t, PeopleLocation loc, FinishCounter f, int speed, SwimStroke s) {
@@ -134,34 +133,50 @@ public class Swimmer extends Thread {
 			sleep(movingSpeed*3);  //not rushing 
 		}
 	}
+
+	void setPrince(AtomicBoolean checker){
+		this.checker = checker;
+	}
 	
 	public void run() {
 		try {
-			//Swimmer arrives
 			sleep(movingSpeed+(rand.nextInt(10))); //arriving takes a while
 			myLocation.setArrived();
 			enterStadium();	
 			goToStartingBlocks();
-			MedleySimulation.swimLatch.countDown();
-			
-			try {
-				MedleySimulation.swimLatch.await();
-				//System.out.println("swim latch opened");				
-				dive();	
-			} catch (InterruptedException e) {
+			if (swimStroke.getOrder() == 0) {
+				MedleySimulation.startLatch.await();	
 			}
-
+			else{
+				synchronized (checker) {
+					while (!checker.get() ) { 
+						checker.wait();
+					}
+				}
+			}
+			checker.set(false);
+			dive();	
+			
 			swimRace();
 
-			if(swimStroke.order==4) {
+			if(swimStroke.order==3) {
+				//System.out.println("y-coord: "+this.getY());
 				finish.finishRace(ID, team); // fnishline
 			}
 			else {
 				//System.out.println("Thread "+this.ID + " done " + currentBlock.getX()  + " " +currentBlock.getY() );			
-				exitPool();//if not last swimmer leave pool
+				synchronized (checker) {
+					checker.set(true);
+					checker.notifyAll();					
+				}
+
 			}
-			
-		} catch (InterruptedException e1) {} 
-	}
+			exitPool();//if not last swimmer leave pool
+		}  
+		catch (InterruptedException e){
+			e.printStackTrace();
+		}
+		
+		}  	
 	
 }

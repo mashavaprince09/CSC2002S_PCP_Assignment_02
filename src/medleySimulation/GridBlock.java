@@ -33,23 +33,23 @@ public class GridBlock {
 		isOccupied = threadID; // set ID to thread that has block
 		return true;
 	}
-			
+	
 	
 	//release a block
-	public  void release() {
-		isOccupied= -1;
+	synchronized public  void release() {
+		isOccupied = -1;
 	}
 	
 
 	//is a bloc already occupied?
-	public  boolean occupied() {
-		if(isOccupied==-1) return false;
+	synchronized public  boolean occupied() {
+		if (isOccupied ==-1) return false;
 		return true;
 	}
 	
 	
 	//is a start block
-	public  boolean isStart() {
+	synchronized public  boolean isStart() {
 		return isStart;	
 	}
 

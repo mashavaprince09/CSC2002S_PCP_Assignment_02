@@ -5,12 +5,11 @@ package medleySimulation;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.CyclicBarrier;
-
 import javax.swing.*;
 
 public class MedleySimulation {
-	static CountDownLatch swimLatch =  new CountDownLatch(10);
+
+	static CountDownLatch startLatch;
 
 	static final int numTeams=10;
 	
@@ -64,7 +63,7 @@ public class MedleySimulation {
 		startB.addActionListener(new ActionListener() {
             @Override
 		    public void actionPerformed(ActionEvent e)  {
-				SwimTeam.startLatch.countDown();
+				if (startLatch.getCount()==1) startLatch.countDown();
 		    }
 		   });
 	
@@ -109,10 +108,10 @@ public class MedleySimulation {
       	Thread results = new Thread(counterDisplay);  
       	results.start();
       	
-      	//start teams, which start swimmers.
-      	for (int i=0;i<numTeams;i++) {
-			teams[i].start();
-		}
+		startLatch = new CountDownLatch(1);
+			for (int i=0;i<numTeams;i++) {
+			  teams[i].start();
+			}
 
 	}
 }

@@ -30,7 +30,7 @@ public class StadiumGrid {
 		}
 	
 	//initialise the grid, creating all the GridBlocks, marking the starting blocks
-	private  void initGrid() throws InterruptedException {
+	synchronized private  void initGrid() throws InterruptedException {
 		int startBIndex=0;
 		for (int i=0;i<x;i++) {
 			for (int j=0;j<y;j++) {
@@ -67,7 +67,7 @@ public class StadiumGrid {
 	
 	
 	//a person enters the stadium
-	public GridBlock enterStadium(PeopleLocation myLocation) throws InterruptedException  {
+	synchronized public GridBlock enterStadium(PeopleLocation myLocation) throws InterruptedException  {
 				while((entrance.get(myLocation.getID()))) {} //wait at entrace until entrance is free - spinning, not good
 				myLocation.setLocation(entrance);
 				myLocation.setInStadium(true);
@@ -100,19 +100,26 @@ public class StadiumGrid {
 		}
 
 		GridBlock newBlock;
-		if(add_x!=0)
-			newBlock = whichBlock(add_x+c_x,c_y); //try moving x only first
-		else 
-			newBlock= whichBlock(add_x+c_x,add_y+c_y);//try diagonal or y
-		
-		
-			while((!newBlock.get(myLocation.getID()))) {} //wait until block is free - but spinning is bad
-			myLocation.setLocation(newBlock);		
-			currentBlock.release(); //must release current block
-			return newBlock;
-		
-		
-	} 
+		if (add_x != 0)
+		newBlock = whichBlock(add_x + c_x, c_y);
+		else
+		newBlock = whichBlock(add_x + c_x, add_y + c_y);
+
+	synchronized (newBlock) {
+			while ((!newBlock.get(myLocation.getID()))) {
+				newBlock.wait();
+			}
+		}
+
+		myLocation.setLocation(newBlock);
+		currentBlock.release();
+
+		synchronized (currentBlock) {
+		currentBlock.notify();
+		}
+		return newBlock;
+
+  }
 	
 	//levitate to a specific block -
 	public GridBlock jumpTo(GridBlock currentBlock,int x, int y,PeopleLocation myLocation) throws InterruptedException {  
@@ -122,17 +129,24 @@ public class StadiumGrid {
 			//Invalid move to outside  - ignore
 			return currentBlock;
 		}
+		GridBlock newBlock = whichBlock(x, y);// try diagonal or y
 
-		GridBlock newBlock= whichBlock(x,y);//try diagonal or y
-		
-		
-			while((!newBlock.get(myLocation.getID()))) { } //wait until block is free - but spinning, not good
-			myLocation.setLocation(newBlock);		
-			currentBlock.release(); //must release current block
-			return newBlock;
-		
-		
-	} 
+		synchronized (newBlock) {
+		  while ((!newBlock.get(myLocation.getID()))) {
+			newBlock.wait();
+		  }
+		}
+	
+		myLocation.setLocation(newBlock);
+		currentBlock.release(); 
+	
+		synchronized (currentBlock) {
+		  currentBlock.notify();
+		}
+	
+		return newBlock;
+	
+	  }
 	
 //x and y actually correspond to the grid pos, but this is for generality.
 	public GridBlock whichBlock(int xPos, int yPos) {
@@ -143,9 +157,3 @@ public class StadiumGrid {
 		return null;
 	}
 }
-
-
-	
-
-	
-

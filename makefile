@@ -29,7 +29,7 @@ $(BIN_DIR)/%.class: $(SRC_DIR)/%.java
 	javac $(JAVAC_FLAGS) $<
 
 clean:
-	rm -rf bin/*
+	rm -rf bin/* src/medleySimulation/*.class  C:/Users/masha/AppData/Roaming/Code/User/workspaceStorage/ab8cc4193f0bb2978c4f571108e8507c/redhat.java/jdt_ws/PCP2SkeletonCode_891ba943/bin/MedleySimulation/*
 
 run: all
 	java -classpath bin $(MAIN_CLASS) $(ARGS)
