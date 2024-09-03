@@ -26,11 +26,11 @@ public class FinishCounter {
 	}
 	
 	//Has race been won?
-	public boolean isRaceWon() {
+	synchronized public boolean isRaceWon() {
 		return !firstAcrossLine;
 	}
 
-	public int getWinner() { return winner; }
+	synchronized public int getWinner() { return winner; }
 	
-	public int getWinningTeam() { return winningTeam;}
+	public int getWinningTeam() { return winningTeam+1;}
 }

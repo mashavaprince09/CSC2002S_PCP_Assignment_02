@@ -42,14 +42,14 @@ public class GridBlock {
 	
 
 	//is a bloc already occupied?
-	synchronized public  boolean occupied() {
+	public  boolean occupied() {
 		if (isOccupied ==-1) return false;
 		return true;
 	}
 	
 	
 	//is a start block
-	synchronized public  boolean isStart() {
+	public  boolean isStart() {
 		return isStart;	
 	}
 

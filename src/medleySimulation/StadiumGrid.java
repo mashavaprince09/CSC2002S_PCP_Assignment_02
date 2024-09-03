@@ -68,7 +68,7 @@ public class StadiumGrid {
 	
 	//a person enters the stadium
 	synchronized public GridBlock enterStadium(PeopleLocation myLocation) throws InterruptedException  {
-				while((entrance.get(myLocation.getID()))) {} //wait at entrace until entrance is free - spinning, not good
+				while(!(entrance.get(myLocation.getID()))) {} //wait at entrace until entrance is free - spinning, not good
 				myLocation.setLocation(entrance);
 				myLocation.setInStadium(true);
 				return entrance;
@@ -105,7 +105,7 @@ public class StadiumGrid {
 		else
 		newBlock = whichBlock(add_x + c_x, add_y + c_y);
 
-	synchronized (newBlock) {
+	   synchronized (newBlock) {
 			while ((!newBlock.get(myLocation.getID()))) {
 				newBlock.wait();
 			}
@@ -120,13 +120,11 @@ public class StadiumGrid {
 		return newBlock;
 
   }
-	
-	//levitate to a specific block -
+
 	public GridBlock jumpTo(GridBlock currentBlock,int x, int y,PeopleLocation myLocation) throws InterruptedException {  
 		//restrict i and j to grid
 		if (!inStadiumArea(x,y)) {
 			System.out.println("Invalid move");
-			//Invalid move to outside  - ignore
 			return currentBlock;
 		}
 		GridBlock newBlock = whichBlock(x, y);// try diagonal or y

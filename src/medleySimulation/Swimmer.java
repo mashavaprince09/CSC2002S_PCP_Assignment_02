@@ -3,9 +3,9 @@
 //Swimmers have one of four possible swim strokes: backstroke, breaststroke, butterfly and freestyle
 package medleySimulation;
 
-import java.awt.Color;
 import java.util.Random;
-import java.util.concurrent.atomic.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.*;
 
 public class Swimmer extends Thread {
 	public static StadiumGrid stadium; //shared 
@@ -19,30 +19,10 @@ public class Swimmer extends Thread {
 	private int ID; //thread ID 
 	private int team; // team ID
 	private GridBlock start;
-
-	public enum SwimStroke { 
-		Backstroke(0,2.5,Color.black),
-		Breaststroke(1,2.1,new Color(255,102,0)),
-		Butterfly(2,2.55,Color.magenta),
-		Freestyle(3,2.8,Color.red);
-	    	
-	     private final double strokeTime;
-	     private final int order; // in minutes
-	     private final Color colour;   
-
-	     SwimStroke( int order, double sT, Color c) {
-	            this.strokeTime = sT;
-	            this.order = order;
-	            this.colour = c;
-	        }
-	  
-	        public int getOrder() {return order;}
-
-	        public  Color getColour() { return colour; }
-	    }  
-	    private final SwimStroke swimStroke;
+   
+   private final SwimStroke swimStroke;
 		
-		private  AtomicBoolean checker;//my lane checker
+	private AtomicBoolean checker;//my lane checker
 	
 	//Constructor
 	Swimmer( int ID, int t, PeopleLocation loc, FinishCounter f, int speed, SwimStroke s) {
@@ -110,14 +90,14 @@ public class Swimmer extends Thread {
 		while((boolean) ((currentBlock.getY())!=0)) {
 			currentBlock=stadium.moveTowards(currentBlock,x,0,myLocation);
 			//System.out.println("Thread "+this.ID + " swimming " + currentBlock.getX()  + " " +currentBlock.getY() );
-			sleep((int) (movingSpeed*swimStroke.strokeTime)); //swim
+			sleep((int) (movingSpeed*swimStroke.getstrokeTime())); //swim
 			//System.out.println("Thread "+this.ID + " swimming  at speed" + movingSpeed );	
 		}
 
 		while((boolean) ((currentBlock.getY())!=(StadiumGrid.start_y-1))) {
 			currentBlock=stadium.moveTowards(currentBlock,x,StadiumGrid.start_y,myLocation);
 			//System.out.println("Thread "+this.ID + " swimming " + currentBlock.getX()  + " " +currentBlock.getY() );
-			sleep((int) (movingSpeed*swimStroke.strokeTime));  //swim
+			sleep((int) (movingSpeed*swimStroke.getstrokeTime()));  //swim
 		}
 		
 	}
@@ -125,7 +105,7 @@ public class Swimmer extends Thread {
 	//!!!You do not need to change the method below!!!
 	//after finished the race
 	public void exitPool() throws InterruptedException {		
-		int bench=stadium.getMaxY()-swimStroke.getOrder(); 			 //they line up
+		int bench=stadium.getMaxY()-swimStroke.getOrder(); 		//they line up
 		int lane = currentBlock.getX()+1;//slightly offset
 		currentBlock=stadium.moveTowards(currentBlock,lane,currentBlock.getY(),myLocation);
 	   while (currentBlock.getY()!=bench) {
@@ -134,7 +114,7 @@ public class Swimmer extends Thread {
 		}
 	}
 
-	void setPrince(AtomicBoolean checker){
+	void setChecker(AtomicBoolean checker){
 		this.checker = checker;
 	}
 	
@@ -145,9 +125,9 @@ public class Swimmer extends Thread {
 			enterStadium();	
 			goToStartingBlocks();
 			if (swimStroke.getOrder() == 0) {
-				MedleySimulation.startLatch.await();	
+				MedleySimulation.startBarrier.await();	
 			}
-			else{
+			else {
 				synchronized (checker) {
 					while (!checker.get() ) { 
 						checker.wait();
@@ -156,12 +136,11 @@ public class Swimmer extends Thread {
 			}
 			checker.set(false);
 			dive();	
-			
 			swimRace();
 
-			if(swimStroke.order==3) {
+			if(swimStroke.getOrder()==3) {
 				//System.out.println("y-coord: "+this.getY());
-				finish.finishRace(ID, team); // fnishline
+				finish.finishRace(ID, team); // finishline
 			}
 			else {
 				//System.out.println("Thread "+this.ID + " done " + currentBlock.getX()  + " " +currentBlock.getY() );			
@@ -169,11 +148,11 @@ public class Swimmer extends Thread {
 					checker.set(true);
 					checker.notifyAll();					
 				}
-
+   			exitPool();//if not last swimmer leave pool
 			}
-			exitPool();//if not last swimmer leave pool
+
 		}  
-		catch (InterruptedException e){
+		catch (BrokenBarrierException | InterruptedException e){
 			e.printStackTrace();
 		}
 		

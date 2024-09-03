@@ -5,13 +5,15 @@ package medleySimulation;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.CyclicBarrier;
 import javax.swing.*;
 
 public class MedleySimulation {
 
-	static CountDownLatch startLatch;
 
 	static final int numTeams=10;
+	static CountDownLatch startLatch;
+   static CyclicBarrier startBarrier = new CyclicBarrier(numTeams);   
 	
    	static int frameX=300; //frame width
 	static int frameY=600;  //frame height
@@ -63,7 +65,8 @@ public class MedleySimulation {
 		startB.addActionListener(new ActionListener() {
             @Override
 		    public void actionPerformed(ActionEvent e)  {
-				if (startLatch.getCount()==1) startLatch.countDown();
+				if (startLatch.getCount()==1) 
+               startLatch.countDown();
 		    }
 		   });
 	
@@ -88,7 +91,6 @@ public class MedleySimulation {
 	
 //Main method - starts it all
 	public static void main(String[] args) throws InterruptedException {
-	
 	    finishLine = new FinishCounter(); //counters for people inside and outside club
 	 
 		stadiumGrid = new StadiumGrid(gridX, gridY, numTeams,finishLine); //setup stadium with size     
@@ -104,14 +106,14 @@ public class MedleySimulation {
 		Thread view = new Thread(stadiumView); 
 		view.start();
        
-      	//Start counter thread - for updating results
-      	Thread results = new Thread(counterDisplay);  
-      	results.start();
-      	
+      //Start counter thread - for updating results
+      Thread results = new Thread(counterDisplay);  
+      results.start();
+      	   
 		startLatch = new CountDownLatch(1);
-			for (int i=0;i<numTeams;i++) {
-			  teams[i].start();
-			}
+		for (int i=0;i<numTeams;i++) {
+		   teams[i].start();
+		}
 
 	}
 }
