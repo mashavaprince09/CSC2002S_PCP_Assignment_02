@@ -33,13 +33,14 @@ public class SwimTeam extends Thread {
 		
     public void run() {
         try {			
-			MedleySimulation.startLatch.await();
-			swimmers[0].start();
+			MedleySimulation.startLatch.await(); //wait until the start button is pressed
+			swimmers[0].start(); // start the black swimmer first 
 			synchronized (this) {
 				for (int j = 1; j < sizeOfTeam;) {
 					System.out.println("team "+teamNo+", swimmer "+j+" started");
+					// only create new swimmers when the previous swimmer has reached the starting block(currentBlock will no longer be null)
 					if (swimmers[j-1].currentBlock != null)
-					   swimmers[j++].start();					
+						swimmers[j++].start();					
 					
 				}					
 			}

@@ -94,7 +94,7 @@ public class StadiumGrid {
 		}
 		//restrict i and j to grid
 		if (!inStadiumArea(add_x+c_x,add_y+c_y)) {
-			System.out.println("Invalid move");
+			//System.out.println("Invalid move");
 			//Invalid move to outside  - ignore
 			return currentBlock;
 		}
@@ -105,6 +105,7 @@ public class StadiumGrid {
 		else
 		newBlock = whichBlock(add_x + c_x, add_y + c_y);
 
+		//lock the new block that this swimmer wants to move into so other swimmers cannot move into it	
 	   synchronized (newBlock) {
 			while ((!newBlock.get(myLocation.getID()))) {
 				newBlock.wait();
@@ -112,8 +113,9 @@ public class StadiumGrid {
 		}
 
 		myLocation.setLocation(newBlock);
+		//release the lock of the old block that the swimmer was in after move it has moved into a new block
 		currentBlock.release();
-
+		//notify other swimmers that are waiting that the currentBlock is now empty
 		synchronized (currentBlock) {
 		currentBlock.notify();
 		}
@@ -128,7 +130,7 @@ public class StadiumGrid {
 			return currentBlock;
 		}
 		GridBlock newBlock = whichBlock(x, y);// try diagonal or y
-
+		//lock the new block that this swimmer wants to move into so other swimmers cannot move into it	
 		synchronized (newBlock) {
 		  while ((!newBlock.get(myLocation.getID()))) {
 			newBlock.wait();
@@ -136,8 +138,9 @@ public class StadiumGrid {
 		}
 	
 		myLocation.setLocation(newBlock);
+		//release the lock of the old block that the swimmer was in after move it has moved into a new block
 		currentBlock.release(); 
-	
+		//notify other swimmers that are waiting that the currentBlock is now empty
 		synchronized (currentBlock) {
 		  currentBlock.notify();
 		}

@@ -13,7 +13,7 @@ public class MedleySimulation {
 
 	static final int numTeams=10;
 	static CountDownLatch startLatch;
-   static CyclicBarrier startBarrier = new CyclicBarrier(numTeams);   
+    static CyclicBarrier startBarrier = new CyclicBarrier(numTeams);   
 	
    	static int frameX=300; //frame width
 	static int frameY=600;  //frame height

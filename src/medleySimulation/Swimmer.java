@@ -153,13 +153,14 @@ public class Swimmer extends Thread {
 		try {
 			sleep(movingSpeed+(rand.nextInt(10))); //arriving takes a while
 			myLocation.setArrived();
-			enterStadium();	
-			goToStartingBlocks();
-			if (swimStroke.getOrder() == 0) {
-				MedleySimulation.startBarrier.await();	
+			enterStadium();	//swimmer enters the stadium
+			goToStartingBlocks(); // swimmer is at the starting block
+			if (swimStroke.getOrder() == 0) { // if the swimmer is a backstroke swimmer
+				MedleySimulation.startBarrier.await();	//cyclicbarrier decreases until all 10 backstroke swimmers have arrived
 			}
 			else {
-				synchronized (checker) {
+				// if the swimmer is not a backstroke swimmer, then it has to wait for the previous swimmer to finish before it can dive into the pool
+				synchronized (checker) { 
 					while (!checker.get() ) { 
 						checker.wait();
 					}
@@ -169,15 +170,15 @@ public class Swimmer extends Thread {
 			dive();	
 			swimRace();
 
+			//when swimmers with the order, 3 are swimming then it means those are the final members for each team
 			if(swimStroke.getOrder()==3) {
-				//System.out.println("y-coord: "+this.getY());
 				finish.finishRace(ID, team); // finishline
 			}
 			else {
 				//System.out.println("Thread "+this.ID + " done " + currentBlock.getX()  + " " +currentBlock.getY() );			
 				synchronized (checker) {
-					checker.set(true);
-					checker.notifyAll();					
+					checker.set(true); // signal the next swimmer in their team that they have finished their part of the race
+					checker.notifyAll(); // signals that the next swimmer can now start their swim.
 				}
    			exitPool();//if not last swimmer leave pool
 			}
