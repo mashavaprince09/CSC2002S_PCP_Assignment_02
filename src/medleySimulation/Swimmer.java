@@ -3,9 +3,10 @@
 //Swimmers have one of four possible swim strokes: backstroke, breaststroke, butterfly and freestyle
 package medleySimulation;
 
+import java.awt.Color;
 import java.util.Random;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 public class Swimmer extends Thread {
 	public static StadiumGrid stadium; //shared 
@@ -19,6 +20,36 @@ public class Swimmer extends Thread {
 	private int ID; //thread ID 
 	private int team; // team ID
 	private GridBlock start;
+
+	public enum SwimStroke { 
+		Backstroke(0,2.5,Color.black),
+		Breaststroke(1,2.1,new Color(255,102,0)),
+		Butterfly(2,2.55,Color.magenta),
+		Freestyle(3,2.8,Color.red);
+			
+		 private final double strokeTime;
+		 private final int order;
+		 private final Color colour;   
+	
+		 private SwimStroke( int order, double sT, Color c) {
+				this.strokeTime = sT;
+				this.order = order;
+				this.colour = c;
+			}
+	  
+			public int getOrder(){
+				return order;
+			}
+	
+			public  Color getColour() { 
+				return colour; 
+			}
+	
+			public double getstrokeTime(){
+				return strokeTime;
+			}
+		
+		}	
    
    private final SwimStroke swimStroke;
 		

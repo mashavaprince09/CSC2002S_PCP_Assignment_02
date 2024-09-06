@@ -2,8 +2,8 @@
 //Class to represent a swim team - which has four swimmers
 package medleySimulation;
 
-import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.*;
+import medleySimulation.Swimmer.SwimStroke;
 
 public class SwimTeam extends Thread {
 ;
@@ -45,7 +45,6 @@ public class SwimTeam extends Thread {
 			}
 						
         } catch (InterruptedException e) {
-            e.printStackTrace();
         }
     }
 }
